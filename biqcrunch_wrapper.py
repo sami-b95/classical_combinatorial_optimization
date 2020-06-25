@@ -36,4 +36,7 @@ class BiqCrunchWrapper():
                 subprocess.call([self.python_bin, os.path.join(self.biqcrunch_dir, "tools", "lp2bc.py"), lp_filename], stdout=bc_file)
             # Execute BiqCrunch
             output = subprocess.check_output([os.path.join(self.biqcrunch_dir, "problems", "generic", "biqcrunch"), bc_filename, os.path.join(self.biqcrunch_dir, "problems", "max-cut", "biq_crunch.param")])
-            return int(str(output).split("Maximum value = ")[1].split("\\n")[0]), [int(vertex_str) for vertex_str in str(output).split("Solution = ")[1].split("\\n")[0][2:-2].split(" ")]
+            vertices_colors = {v: 0 for v in g}
+            for vertex_idx in [int(vertex_str) for vertex_str in str(output).split("Solution = ")[1].split("\\n")[0][2:-2].split(" ")]:
+                vertices_colors[list(g.keys())[vertex_idx - 1]] = 1
+            return int(str(output).split("Maximum value = ")[1].split("\\n")[0]), vertices_colors
