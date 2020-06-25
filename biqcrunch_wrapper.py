@@ -4,8 +4,9 @@ import tempfile
 
 
 class BiqCrunchWrapper():
-    def __init__(self, biqcrunch_dir):
+    def __init__(self, biqcrunch_dir, python_bin="python3.7"):
         self.biqcrunch_dir = biqcrunch_dir
+        self.python_bin = python_bin
     
     def max_cut(self, g):
         # Define .lp and .bc filenames
@@ -31,7 +32,8 @@ class BiqCrunchWrapper():
                 lp_file.write("  " + " ".join([f"x{v}" for v in g]))
                 lp_file.write("\n\nEnd")
             # Convert LP to BC
-            os.system(f"python3.7 {self.biqcrunch_dir}/tools/lp2bc.py {lp_filename} > {bc_filename}")
+            with open(bc_filename, "wb") as bc_file:
+                subprocess.call([self.python_bin, os.path.join(self.biqcrunch_dir, "tools", "lp2bc.py"), lp_filename], stdout=bc_file)
             # Execute BiqCrunch
-            output = subprocess.check_output([f"{self.biqcrunch_dir}/problems/generic/biqcrunch", bc_filename, f"{self.biqcrunch_dir}/problems/max-cut/biq_crunch.param"])
+            output = subprocess.check_output([os.path.join(self.biqcrunch_dir, "problems", "generic", "biqcrunch"), bc_filename, os.path.join(self.biqcrunch_dir, "problems", "max-cut", "biq_crunch.param")])
             return int(str(output).split("Maximum value = ")[1].split("\\n")[0])
